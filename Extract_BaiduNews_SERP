@@ -1,0 +1,69 @@
+
+import urllib2
+import re,os
+
+'''rc_title = re.compile(r'(?<=<!--resulttitle:).*(?=-->)')
+rc_snippet = re.compile(r'.*class="ft".*')
+rc_tag = re.compile(r'(?<=<).*?(?=>)')
+rc_cite = re.compile(r'(?<=<cite title=").*(?=">)')
+rc_date = re.compile(r'(?<=&nbsp;).*(?=<!--resultinfodate:)')
+file_test = open('test.txt','w')'''
+rc_tag = re.compile(r'(?<=<).*?(?=>)')
+rc_script = re.compile(r'(?<=<script>)(.*?)(?=</script>)')
+rc_href = re.compile(r'(?<=<a).*?(?=>)')
+
+
+'''def extractSERPbyQuery(query):
+    url = 'http://www.sogou.com/web?ie=utf8&query='
+    url += urllib2.quote(query)
+    url += '&num=100'
+    response = urllib2.urlopen(url)
+    ret = list()
+    for line in response.read().split('\n'):
+        match = rc_title.search(line)
+        if match:
+            print(match)
+            file_test.write(match)'''
+            
+
+def extractSERPbyHtml(html,file_name):
+    fr = file(html)
+    ret = list()
+    text = fr.read()
+    #unicodePage=fr.decode("utf-8")
+    scripts = re.findall('<li class="result" id="\d+">(.*?)</li>',text,re.S)
+    for script in scripts:
+       # print(script)
+        tags = rc_tag.findall(script)
+        #print(item)
+        for tag in tags:
+            script = script.replace('<'+tag+'>', '')
+        script = script.replace('\n','')
+        script = script.replace('\t','')
+        hrefs = rc_href.findall(script)
+        for href in hrefs:
+            script = script.replace('<a'+href+'>','')
+            #print(href)
+        #print(script)
+        file_name.write(script+'\n')
+            
+# from 2012.5.21 - 2012.9.18
+# totally 121 days
+days = 121
+for day in range(1,days+1):
+    result_file_name = str(day)+'.txt'
+    result_file = open(result_file_name,'w')
+    folder = str(day)
+    count = 1 
+    for search_file_name in os.listdir(folder):
+        #print (search_file_name)
+        search_file_name ='.\\' + folder +'\\'+search_file_name
+        print ("working on the day "+ str(day) + " and the file "+str(count))
+        count = count + 1 
+        #print(search_file_name)
+        #search_file_name_decode = search_file_name.decode('gbk')
+        #print(search_file_name_decode.encode('utf8'))
+        l = extractSERPbyHtml(search_file_name,result_file)
+#l = extractSERPbyHtml('.\\1\\ns@word=gs&tn=news&from=news&cl=2&ct=1&bt=1337529600&et=1337615999&rn=100','fdfd')
+#file_test.close()
+#file_test.close()
